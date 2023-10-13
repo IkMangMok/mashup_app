@@ -1,5 +1,7 @@
+
+
 <template>
-  <div class="map-container">
+  <div class="container">
     <!-- 用于存放地图的容器 -->
     <div id="map"></div>
   </div>
@@ -7,21 +9,51 @@
 
 
 <script>
+/* global BMapGL */
+
+
 export default {
-  name: 'MapContainer'
+  name: 'HelloWorld',
+  data() {
+    return {
+      map: null  // 用于存储地图实例的变量
+    };
+  },
+  mounted() {
+    // 初始化地图
+    //this.initializeMap();
+  },
+  methods: {
+    initializeMap() {
+      if (typeof BMapGL === 'undefined') {
+        console.error('百度地图API未加载');
+        return;
+      }
+
+      this.map = new BMapGL.Map("map");  // 使用BMapGL，WebGL版的初始化
+      const point = new BMapGL.Point(116.404, 39.915);
+      this.map.centerAndZoom(point, 15);
+    }
+  }
+
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.map-container {
+.container {
   width: 100%;
-  height: 100vh; /* 使容器充满视窗的高度 */
-  position: relative; /* 如果您需要在地图上叠加其他元素 */
+  height: 120vh;
+  position: relative;
+ /* background-image: url("~@/assets/bg.png");
+  background-size: auto;  /* 保持背景图片的原始大小 */
+ /* background-repeat: no-repeat;
+  background-position: center top; */
+
 }
 
 #map {
-  width: 100%;
-  height: 100%;
+  width: 20%;
+  height: 20%;  /* 让地图充满整个容器 */
 }
 </style>
