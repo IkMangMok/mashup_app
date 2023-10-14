@@ -1,4 +1,5 @@
 <template>
+
   <HelloWorld msg="Welcome to Your Vue.js App"/>
   <gpt></gpt>
 </template>
@@ -24,5 +25,9 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+  background-image: url(~@/assets/bg.png);  /* 添加这行代码 */
+  background-size: cover;  /* 背景图片会覆盖整个元素 */
+  background-position: center;  /* 背景图片居中 */
+  background-repeat: no-repeat;  /* 不重复背景图片 */
 }
 </style>

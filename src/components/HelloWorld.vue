@@ -42,8 +42,8 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .container {
-  width: 100%;
-  height: 120vh;
+  width: 120vh;
+  height: 100vh;
   position: relative;
  /* background-image: url("~@/assets/bg.png");
   background-size: auto;  /* 保持背景图片的原始大小 */
