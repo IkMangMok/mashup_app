@@ -2,71 +2,142 @@
     <div class="container">
       <!-- 用于GPT API 测试-->
        <!-- 聊天记录 -->
-      <div class="chat-history">
-        <div v-for="(message, index) in chatHistory" :key="index" :class="['message-box', message.role]">
-          <div>{{ message.role === 'user' ? '你: ' : 'GPT: ' }}{{ message.content }}</div>
+        <div class="chat-history">
+          <div v-for="(message, index) in chatHistory" :key="index" :class="['message-box', message.role]">
+            <div v-if="message.type === 'text'">{{ message.role === 'user' ? '你: ' : 'GPT: ' }}{{ message.content }}</div>
+            <MapComponent v-if="message.type === 'map'" :start="message.start" :end="message.end" />
+
         </div>
       </div>
       <input v-model="userInput" placeholder="请输入文本..."/>
-      <button @click="getGPTResponse">提交</button>
+      <button @click="handleUserInput">提交</button>
       <div id="GPT"></div>
     </div>
   </template>
   
   <script>
 
+
   import OpenAI from 'openai';
+  import { apiConfig } from '@/services/apiConfig.js';
+  import { generateURL } from '@/services/authentication.js';
+  import MapComponent from './MapComponent.vue';
 
   export default {
     name: 'ChatGpt',
     data() {
       return {
-        ChatGpt: null,  // 用于存储gpt实例的变量
-        chatHistory: [],  // 用于存储聊天记录的数组
+        openai: null,  // 用于存储gpt实例的变量
+        chatHistory: [],  // 用于存储GPT聊天记录的数组
+        sparkHistory: [],  //用于存储讯飞星火API消息的数组
         userInput: "",  // 用户的输入
-        gptResponse: ""  // GPT的回应
+        gptResponse: "",  // GPT的回应
+        API_KEY : "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",
+        ApiType:[],
+
       };
     },
+    components: {
+        MapComponent,
+    },
     methods: {
-        gpt_frontend_test(){
-            this.chatHistory.push({ role: 'user', content: "这是测试用例,并没有实际接入GPT接口" });
-            this.chatHistory.push({ role: 'gpt', content: "當然，我為您再次解釋「Software configuration」，並使用中國大陸的語境： "+
-            "「Software configuration」在中國大陸的普通話中通常被稱為「軟件配置」。它指的是管理和維護軟件應用中的各種設定和組件的過程。"+
-            "具體來說，軟件配置可以包括以下方面：1. **版本控制**：它確保軟件版本的一致性，並管理不同的軟件版本。"+
-            "2. **構建管理**：這涉及管理從源碼到可執行文件的軟件構建過程。"+
-            "3. **變更管理**：追踪和管理對軟件的修改，以確保其一致性和質量。"+
-            "4. **發布管理**：確保軟件能夠正確且高效地部署到生產環境中。"+
-            "5. **環境管理**：管理軟件在不同環境（如開發、測試、生產）中的設定。"+
-            "希望這次的解釋更加清晰和正確。再次感謝您的指正！" 
-            });
+      //给予特定的地图ID
+
+        async APIChoose(){
+        
+              return new Promise((resolve, reject) => {
+                  if(this.userInput.includes('导航'))   //早期先使用关键词解决
+                  {
+                      //提取出起点和终点
+                      this.ApiType.push(1);
+                      const URL = generateURL();
+                      const ws = new WebSocket(URL);
+                      console.log(this.userInput);
+                      ws.addEventListener('open', () => {
+                        // 动态填充payload.message.text字段
+                        apiConfig.payload.message.text.push({ role: 'user',  content: '这是输入文本：“' + this.userInput+'”请提取出起点和终点，输出格式例如：“起点：AAA,终点：BBB@”,不要忘记结尾的@' });
+                        console.log(apiConfig);
+                        ws.send(JSON.stringify(apiConfig));
+                      });
+
+                      ws.addEventListener('message', (data) => {
+                        const response = JSON.parse(data.data);
+                        this.sparkHistory.push(response.payload.choices.text[0].content);
+                        console.log(this.sparkHistory.join(''));  // 将所有响应拼接在一起并打印
+                        if (response.payload.choices.text[0].content.endsWith('@')) {         
+                            resolve();
+                        }
+                      });
+
+                      ws.addEventListener('error', (error) => {
+                          reject(error);  // 在遇到错误时调用reject
+                      });
+
+                  }
+                  if(this.userInput.includes('飞机'))
+                  {
+                      //提取出起点和终点
+                  }
+                  if(this.userInput.includes('火车'))
+                  {
+                      //提取出起点和终点
+                  }
+                  if(this.userInput.includes('酒店'))
+                  {
+                      //提取出地点
+                  }
+                  if(this.userInput.includes('餐馆'))
+                  {
+                      //提取出地点
+                  }
+              });
+  
         },
+        async handleUserInput() {
+
+              // 将用户输入转发给星火大模型
+              await this.APIChoose();
+              if(this.ApiType.includes(1))
+              {
+                  let responseText = this.sparkHistory.join('');
+                  console.log(responseText)
+                  let startPoint = responseText.split('，')[0].split('：')[1];
+                  let endPoint = responseText.split('，')[1].split('：')[1].slice(0, -1);  
+                  console.log(startPoint); 
+                  console.log(endPoint);
+                  this.chatHistory.push({ role: 'gpt', content: '', type: 'map', start: startPoint , end: endPoint })
+                  this.sparkHistory =[];
+              }
+
+
+         
+        },
+
         async getGPTResponse() {
-        const API_KEY ="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";
 
-        const openai = new OpenAI({
-            apiKey: API_KEY,
-            dangerouslyAllowBrowser: true 
-        });
+          this.openai = new OpenAI({
+              apiKey: this.API_KEY,
+              dangerouslyAllowBrowser: true 
+          });
+          
+          
+          try {
+                  const completion = await this.openai.chat.completions.create({
+                      model: "gpt-3.5-turbo",
+                      messages: [{ role: "user", content: this.userInput }],            //输入语句
+                      //max_tokens : 10 ,
+                  });
 
-        try {
-                const completion = await openai.chat.completions.create({
-                    model: "gpt-3.5-turbo",
-                    messages: [{ role: "user", content: this.userInput }],            //输入语句
-                    //max_tokens : 10 ,
-                });
-
-                
-                this.gptResponse = completion.choices[0].message.content;
-                this.chatHistory.push({ role: 'user', content: this.userInput });
-                this.chatHistory.push({ role: 'gpt', content: this.gptResponse });
-                  console.log(this.gptResponse);
-                
-            } catch (error) {
-                console.error(error);
-            }
-      }
-
-
+                  
+                  this.gptResponse = completion.choices[0].message.content;
+                  this.chatHistory.push({ role: 'user', content: this.userInput , type:'text' });
+                  this.chatHistory.push({ role: 'gpt', content: this.gptResponse , type:'text'});
+                    console.log(this.gptResponse);
+                  
+              } catch (error) {
+                  console.error(error);
+              }
+        }
     }
   }
   </script>
@@ -83,7 +154,7 @@
       border: 1px solid #ccc;
       padding: 10px;
       margin-bottom: 10px;
-      height: 300px;
+      height: 100%;
       overflow-y: auto;
       background-color: rgba(255, 255, 255, 0.7);;  /* 設置背景顏色 */
     }
@@ -103,6 +174,7 @@
 
     .gpt {
       background-color: #e2e2e2;
+
       float: left;  /* 将GPT消息浮动到左侧 */
       border-bottom-left-radius: 0;
     }
