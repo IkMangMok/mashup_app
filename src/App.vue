@@ -1,19 +1,26 @@
 <template>
 
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
-  <gpt></gpt>
+<gpt></gpt> 
+<!--<TrainSearch date="2023-10-23" start="南宁" end="防城港北"></TrainSearch>-->
 </template>
 
 
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+/* eslint-disable */
+
 import gpt from './components/gpt.vue';
+import TrainSearch from './components/TrainSearch.vue';
+
 export default {
   name: 'App',
   components: {
-    HelloWorld,
     gpt,
+    TrainSearch,
+  },
+  mounted(){
+
+      
   }
 }
 </script>
@@ -30,4 +37,10 @@ export default {
   background-position: center;  /* 背景图片居中 */
   background-repeat: no-repeat;  /* 不重复背景图片 */
 }
+
+.bm-view {
+  width: 100%;
+  height: 300px;
+}
+
 </style>

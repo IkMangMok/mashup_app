@@ -5,14 +5,15 @@
   </template>
   
   <script>
-  import { TransNavigation } from '../services/mapServices';
+import { TransNavigation } from '../services/mapServices';
   
   export default {
     name: 'MapComponent',
 
     props: {
         start: String,
-        end: String
+        end: String,
+        city: String,
     },
 
 
@@ -21,7 +22,7 @@
         this.$nextTick(() => {
             try {
                 console.log(this.mapId)
-                TransNavigation(this.start, this.end, this.mapId);
+                TransNavigation(this.start, this.end, this.city, this.mapId);
             } catch (error) {
                 console.error("Error with TransNavigation:", error.message);
             }
