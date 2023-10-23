@@ -32,21 +32,28 @@ function fetchTrainData(date,start,end) {
             data: []
         };
                               
-        /*const vor_url = `/otn/leftTicketPrice/query?leftTicketDTO.train_date=${data.train_date}&leftTicketDTO.from_station=${data.from_station}&leftTicketDTO.to_station=${data.to_station}&purpose_codes=ADULT`;*/
-        const url = `/otn/leftTicket/query?leftTicketDTO.train_date=${data.train_date}&leftTicketDTO.from_station=${data.from_station}&leftTicketDTO.to_station=${data.to_station}&purpose_codes=ADULT`;
-        console.log(url);
-       // axios.get(vor_url);
-        axios.get(url)
-            .then(response => {
-                data = response.data;
-                console.log(data);
-                resolve(data);
-            })
-            .catch(error => {
+        const vor_url = `/otn/leftTicketPrice/query?leftTicketDTO.train_date=${data.train_date}&leftTicketDTO.from_station=${data.from_station}&leftTicketDTO.to_station=${data.to_station}&purpose_codes=ADULT`;
+        axios.get(vor_url);
 
-                console.error("请求出错:", error);
-                reject(error);
-            });
+        
+        axios.get('/otn/leftTicket/query', {
+            params: {
+              'leftTicketDTO.train_date': data.train_date,
+              'leftTicketDTO.from_station': data.from_station,
+              'leftTicketDTO.to_station': data.to_station,
+              'purpose_codes': 'ADULT'
+            }
+          })
+          .then(response => {
+            data = response.data;
+            console.log(data);
+            resolve(data);
+          })
+          .catch(error => {
+            console.error("请求出错:", error);
+            reject(error);
+          });
+          
     });
 }
 

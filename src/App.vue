@@ -1,7 +1,9 @@
 <template>
 
-<gpt></gpt> 
+<gpt></gpt>
 <!--<TrainSearch date="2023-10-23" start="南宁" end="防城港北"></TrainSearch>-->
+<!--<WikiPedia></WikiPedia>-->
+
 </template>
 
 
@@ -11,12 +13,14 @@
 
 import gpt from './components/gpt.vue';
 import TrainSearch from './components/TrainSearch.vue';
+import WikiPedia from './components/WikiPedia.vue';
 
 export default {
   name: 'App',
   components: {
     gpt,
     TrainSearch,
+    WikiPedia,
   },
   mounted(){
 

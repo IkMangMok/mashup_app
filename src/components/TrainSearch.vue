@@ -87,7 +87,7 @@ export default {
                     duration: parts[10],
                     firstClass: {
                         price: '',
-                        availableSeats: parts[30]
+                        availableSeats: parts[32]
                     },
                     secondClass: {
                         price: '',
@@ -95,14 +95,15 @@ export default {
                     },
                     economyClass: {
                         price: '',
-                        availableSeats: parts[32]
+                        availableSeats: parts[30]
                     },
                     noSeat: {
                         price: '',
-                        availableSeats: parts[33]
+                        availableSeats: parts[26]
                     }
                 };
             });
+            
             this.data = parsedData;
         })
         .catch(error => {

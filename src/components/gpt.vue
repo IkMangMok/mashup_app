@@ -7,7 +7,7 @@
             <div v-if="message.type === 'text'">{{ message.role === 'user' ? '你: ' : 'GPT: ' }}{{ message.content }}</div>
             <MapComponent v-if="message.type === 'map'" :start="message.start" :end="message.end" :city = "message.city"/>
             <TrainSearch v-if="message.type === 'train'" :date="message.date" :start="message.start" :end="message.end"/>
-
+            <WikiPedia v-if="message.type === 'scenary'" :query="message.location"/>
         </div>
       </div>
       <input v-model="userInput" placeholder="请输入文本..."/>
@@ -25,6 +25,8 @@
   import MapComponent from './MapComponent.vue';
   import emitter from '@/services/emitter.js';
   import TrainSearch from './TrainSearch.vue';
+  import WikiPedia from './WikiPedia.vue';
+  import getWeather from '@/services/weather.js';
 
   export default {
     name: 'ChatGpt',
@@ -38,12 +40,15 @@
         gptResponse: "",  // GPT的回应
         API_KEY : "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",
         ApiType:[],
+        todaysWeatherData: "",  //存储天气数据
+        todaysWeather:"" //天气的自然文本
 
       };
     },
     components: {
         MapComponent,
         TrainSearch,
+        WikiPedia,
     },
     mounted(){
 
@@ -88,26 +93,26 @@
         
           if (this.userInput.includes('导航')) {
               this.ApiType.push(1);
-              await this.extractInfo('请提取出城市，起点和终点，输出格式例如：“城市：CC，起点：AAA，终点：BBB，以中文句号结束。”');
+              await this.extractInfo('请判断出城市，起点和终点，输出格式例如：“城市：CC，起点：AAA，终点：BBB，以中文句号结束。”');
               this.userInput =[];
           }
           if (this.userInput.includes('飞机')) {
               this.ApiType.push(2);
-              await this.extractInfo('请提取出日期，起点和终点，输出格式例如：“日期：2023-10-27，起点：AAA，终点：BBB，以中文句号结束。”');
+              await this.extractInfo('请判断出日期，起点和终点，输出格式例如：“日期：2023-10-27，起点：AAA，终点：BBB，以中文句号结束。”');
               this.userInput =[];
           }
 
           if(this.userInput.includes('火车'))
           {
               this.ApiType.push(3);
-              await this.extractInfo('请提取出日期，起点和终点，输出格式例如：“日期：2023-10-27，起点：AAA，终点：BBB，以中文句号结束。”');
+              await this.extractInfo('请判断出日期，起点和终点，输出格式例如：“日期：2023-10-27，起点：AAA，终点：BBB。”，在你输出完所有结果之后，请加上一个“。”');
               this.userInput =[];
               //提取出起点和终点
           }
           if(this.userInput.includes('景点'))   //调用维基百科API
           {
               this.ApiType.push(4);
-              await this.extractInfo('请提取出地点，输出格式例如：“地点：BBB，以中文句号结束。”');
+              await this.extractInfo('请提取出地点，输出格式例如：“地点：BBB。”，在你输出完所有结果之后，请加上一个“。”');
               this.userInput =[];
               //提取出地点
           }
@@ -141,6 +146,9 @@
                   startPoint = matchStart ? matchStart[1] : null;
                   endPoint = matchEnd ? matchEnd[1] : null;
                   console.log(city, startPoint, endPoint, location);
+                  this.todaysWeatherData = await getWeather(city);
+                  console.log(this.todaysWeatherData);
+                  
                   this.chatHistory.push({ role: 'gpt', content: '', type: 'map', city: city, start: startPoint , end: endPoint })
                   this.sparkHistory =[];
                   break;
@@ -160,8 +168,12 @@
                   
                   break;
               case 4:  // 景点
-
                 location = matchLocation ? matchLocation[1] : null;
+                alert('速速科学上网!');
+                await this.sleep(10000);
+
+                this.chatHistory.push({ role: 'gpt', content: '', type: 'scenary', location: location})
+                this.sparkHistory =[];
                 break;
               // ... 更多的case
             }
@@ -170,7 +182,11 @@
               
 
         },
-
+        WeatherDataProcessing() {
+            console.log(this.todaysWeatherData)
+            const { weather, temperature, humidity, winddirection, windpower } = this.todaysWeatherData;
+            this.todaysWeather = `当前天气为${weather}，温度为${temperature}摄氏度，湿度为${humidity}%。风向为${winddirection}，风力为${windpower}级。`;
+        },
         async getGPTResponse() {
 
           this.openai = new OpenAI({
@@ -178,13 +194,14 @@
               dangerouslyAllowBrowser: true 
           });
           
-          console.log('测试');
-          await this.sleep(10000);
-          console.log('睡眠结束');
+          this.WeatherDataProcessing();
+          console.log(this.gptInput,this.todaysWeather)
+          alert('速速科学上网！');
+          
           try {
                   const completion = await this.openai.chat.completions.create({
                       model: "gpt-3.5-turbo",
-                      messages: [{ role: "user", content: this.gptInput + "这是我的输入文本，请你用很可爱的语气描述出来！" }],            //输入语句
+                      messages: [{ role: "user", content: this.gptInput +this.todaysWeather+ "这是我的输入文本，请你根据出行文本，结合今天天气，用很可爱的语气给出出行建议！" }],            //输入语句
                       //max_tokens : 10 ,
                   });
 
