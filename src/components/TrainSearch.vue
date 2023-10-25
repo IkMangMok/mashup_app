@@ -1,49 +1,53 @@
 <template>
   <div>
-    <div v-if="data && data.length">
-          <table>
-              <thead>
-                  <tr>
-                      <th colspan="7">{{ train_date }}</th>
-                  </tr>
-                  <tr>
-                      <th>车次</th>
-                      <th>起点站</th>
-                      <th>终点站</th>
-                      <th>发车时间</th>
-                      <th>到达时间</th>
-                      <th>耗时</th>
-                      <th>商务座</th>
-                      <th>一等座</th>
-                      <th>二等座</th>
-                      <th>无座</th>
+    <div class="content-row">
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th colspan="7">{{ train_date }}</th>
+                    </tr>
+                    <tr>
+                        <th>车次</th>
+                        <th>起点站</th>
+                        <th>终点站</th>
+                        <th>发车时间</th>
+                        <th>到达时间</th>
+                        <th>耗时</th>
+                        <th>商务座</th>
+                        <th>一等座</th>
+                        <th>二等座</th>
+                        <th>无座</th>
 
 
-                  </tr>
-              </thead>
-              <tbody>
-                  <tr v-for="train in data" :key="train.travelcode">
-                      <td>{{ train.trainCode }}</td>
-                      <td>{{ train.fromStation }}</td>
-                      <td>{{ train.toStation }}</td>
-                      <td>{{ train.startTime }}</td>
-                      <td>{{ train.arriveTime }}</td>
-                      <td>{{ train.duration }}</td>
-                      <td>{{ train.firstClass.availableSeats }} </td>
-                      <td>{{ train.secondClass.availableSeats }} </td>
-                      <td>{{ train.economyClass.availableSeats }} </td>
-                      <td>{{ train.noSeat.availableSeats }} </td>
-                  </tr>
-              </tbody>
-          </table>
-      </div>
-
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="train in data" :key="train.travelcode">
+                        <td>{{ train.trainCode }}</td>
+                        <td>{{ train.fromStation }}</td>
+                        <td>{{ train.toStation }}</td>
+                        <td>{{ train.startTime }}</td>
+                        <td>{{ train.arriveTime }}</td>
+                        <td>{{ train.duration }}</td>
+                        <td>{{ train.firstClass.availableSeats }} </td>
+                        <td>{{ train.secondClass.availableSeats }} </td>
+                        <td>{{ train.economyClass.availableSeats }} </td>
+                        <td>{{ train.noSeat.availableSeats }} </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div :id="mapId" class="map-wrapper"></div>
+    </div>
   </div>
 </template>
 
 <script>
 /* eslint-disable */
+/* global BMapGL */
 
+import { showTrain } from '@/services/mapServices';
 import {fetchTrainData} from '@/services/trainsearch.js'
 
 export default {
@@ -55,6 +59,8 @@ export default {
     },
     data() {
         return {
+            mapId: 'map-' + Date.now() + Math.floor(Math.random() * 1000),
+            map:null,
             train_date: this.date,
             from_station: this.start,
             to_station: this.end,
@@ -103,12 +109,13 @@ export default {
                     }
                 };
             });
-            
             this.data = parsedData;
         })
         .catch(error => {
             console.error("加载数据出错:", error);
         });
+  
+        showTrain(this.start, this.end, this.mapId);
 }
 
     },
@@ -116,5 +123,58 @@ export default {
 </script>
 
 <style scoped>
-/* 根据需要添加样式 */
+/* 表格的基础样式 */
+table {
+    width: 100%;
+    border-collapse: collapse;    /* 合并相邻的边框 */
+    font-size: 14px;
+    text-align: left;             /* 文本居左对齐 */
+    margin-bottom: 20px;          /* 表格下方添加20像素的间隔 */
+}
+
+/* 表头样式 */
+thead th {
+    background-color: #f5f5f5;   /* 背景颜色 */
+    border: 1px solid #e0e0e0;   /* 边框 */
+    padding: 8px 15px;           /* 内部填充空间 */
+}
+
+/* 表体的行和单元格样式 */
+tbody tr {
+    border-bottom: 1px solid #e0e0e0;
+}
+
+tbody td {
+    padding: 8px 15px;
+    border-right: 1px solid #e0e0e0;  /* 右侧添加边框 */
+}
+
+/* 最后一个单元格不添加右边框 */
+tbody td:last-child {
+    border-right: none;
+}
+
+/* 表体的行在鼠标悬停时更改背景颜色 */
+tbody tr:hover {
+    background-color: #fafafa;
+}
+
+.table-container {
+    flex: 1;                /* 表格容器将尽可能多地占用空间，但它将与map-wrapper共享空间 */
+    width: 700px;
+    max-height: 1200px;
+    overflow-x: auto;       /* 如果表格太宽，则允许横向滚动 */
+    overflow-y: auto;       /* 如果表格太长，则允许纵向滚动 */
+    margin-bottom: 20px;
+}
+.map-wrapper {
+    flex: 1;
+    width: 700px;
+    height: 400px;
+    margin-top: 20px;
+}
+.content-row {
+    align-items: stretch;   /* 使子元素垂直对齐并填充整个容器的高度*/
+}
+
 </style>

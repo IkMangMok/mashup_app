@@ -13,7 +13,7 @@ function generateAuthHeader()
     const date = (new Date()).toUTCString();
     const host = 'spark-api.xf-yun.com';
     // 构造待签名的字符串
-    const tmp = `host: ${host}\ndate: ${date}\nGET /v2.1/chat HTTP/1.1`;
+    const tmp = `host: ${host}\ndate: ${date}\nGET /v3.1/chat HTTP/1.1`;
     // 利用hmac-sha256算法和APISecret对待签名字符串进行签名，获得签名后的摘要tmp_sha
     const tmp_sha = crypto.createHmac('sha256', APISecret).update(tmp).digest();
     // 将上方的tmp_sha进行base64编码生成signature
@@ -34,7 +34,7 @@ function generateURL() {
         host: 'spark-api.xf-yun.com'
     };
     const queryString = querystring.stringify(params);
-    const url = 'wss://spark-api.xf-yun.com/v2.1/chat?' + queryString;
+    const url = 'wss://spark-api.xf-yun.com/v3.1/chat?' + queryString;
     console.log(url);
     return url;
 }

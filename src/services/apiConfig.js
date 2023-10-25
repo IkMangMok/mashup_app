@@ -7,7 +7,7 @@ const apiConfig ={
     },
     parameter: {
         chat: {
-            domain: 'generalv2',
+            domain: 'generalv3',
             temperature: 0.5,
             max_tokens: 1024,
         }

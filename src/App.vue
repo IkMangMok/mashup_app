@@ -1,31 +1,28 @@
 <template>
-
-<gpt></gpt>
-<!--<TrainSearch date="2023-10-23" start="南宁" end="防城港北"></TrainSearch>-->
-<!--<WikiPedia></WikiPedia>-->
-
+  <div class="main-container">
+    <SideBar></SideBar>
+    <div class="content-container">
+      <TitleView></TitleView>
+      <gpt></gpt>
+    </div>
+  </div>
 </template>
-
 
 
 <script>
 /* eslint-disable */
 
 import gpt from './components/gpt.vue';
-import TrainSearch from './components/TrainSearch.vue';
-import WikiPedia from './components/WikiPedia.vue';
-
+import SideBar from './view/SideBar.vue'
+import TitleView from './view/TitleView.vue'
 export default {
   name: 'App',
   components: {
     gpt,
-    TrainSearch,
-    WikiPedia,
+    TitleView,
+    SideBar,
   },
-  mounted(){
 
-      
-  }
 }
 </script>
 
@@ -40,11 +37,26 @@ export default {
   background-size: cover;  /* 背景图片会覆盖整个元素 */
   background-position: center;  /* 背景图片居中 */
   background-repeat: no-repeat;  /* 不重复背景图片 */
+  border: 1px solid black;
 }
 
-.bm-view {
-  width: 100%;
-  height: 300px;
+.main-container {
+  display: flex;
+  flex-direction: row;
 }
+
+.content-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.gpt {
+  max-width: 800px;
+  max-height: 800px;
+  overflow: auto;
+  margin: 0 auto;  /* 添加这行来使gpt在其容器中居中 */
+}
+
 
 </style>

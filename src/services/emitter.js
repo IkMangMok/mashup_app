@@ -1,6 +1,6 @@
 import mitt from 'mitt';
 
+const EventBus = mitt();
 const emitter = mitt();
 
-export default emitter;
-
+export { EventBus, emitter };

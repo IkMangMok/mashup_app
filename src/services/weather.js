@@ -10,7 +10,8 @@ const getWeather = async (cityName) => {
   
   const city = cities.find(c => c.中文名.includes(cityName));
   if (!city) {
-    throw new Error('City not found.');
+    console.log('City not found.');
+    return;
   }
 
   const adcode = city.adcode;

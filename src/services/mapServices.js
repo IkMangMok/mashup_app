@@ -1,8 +1,27 @@
 /* global BMapGL */
 /* eslint-disable */
-import emitter from './emitter.js';
+import {emitter} from './emitter.js';
 
-function showmap(){
+function showTrain(start, end, mapId){
+    let map;
+    try {
+        map = new BMapGL.Map(mapId);
+        map.centerAndZoom(start, 7);
+    } catch (error) {
+        console.error("Error with BMapGL:", error.message);
+        return;
+    }
+
+    var startlocal = new BMapGL.LocalSearch(map, {
+		renderOptions:{map: map},
+        onSearchComplete: function(results){
+            console.log(results);
+        }
+	});
+    //startlocal.search(start);
+    console.log(start);
+
+
 
 }
 
@@ -32,13 +51,13 @@ function showPlanOnMap(plan, map ,start ,end) {
         console.log(plan.getTotalType(i));
         // 检查路段的类型
         if (plan.getTotalType(i) == 0) { // 如果是步行路段
-            const polyline = segment.getPolyline();
-            map.addOverlay(polyline);
-        } else if (plan.getTotalType(i) == 1) { // 如果是公交或地铁线路
-            // 对于线路对象，你可能需要处理该对象的数据来获取或渲染折线
-            // 这里是一个简化的示例，具体的处理可能会根据实际情况有所不同
             const path = segment.getPath();
             const polyline = new BMapGL.Polyline(path);
+            map.addOverlay(polyline);
+        } else if (plan.getTotalType(i) == 1) { // 如果是公交或地铁线路
+
+            const path = segment.getPath();
+            const polyline = new BMapGL.Polyline(path,{strokeColor : '#0066FF', strokeWeight : 6});
             map.addOverlay(polyline);
         }
     }
@@ -56,11 +75,11 @@ function showPlanOnMap(plan, map ,start ,end) {
     const routeDistance = plan.getDistance(true);
     console.log(routeString,routeDuration,routeDistance);
     routeString = routeString + '。总时长：' + routeDuration +",总距离：" + routeDistance;
-    //emitter.emit('route-found', routeString);
+    emitter.emit('route-found', routeString);
 }
 
 
-async function TransNavigation(startPoint, endPoint, city, mapId) {
+async function TransNavigation(startPoint, endPoint, city, mapId, callback) {
     if (typeof BMapGL === 'undefined') {
         console.error('百度地图API未加载');
         return;
@@ -85,29 +104,23 @@ async function TransNavigation(startPoint, endPoint, city, mapId) {
         console.log(sPoint, ePoint);
 
         const transit = new BMapGL.TransitRoute(map, {
-            renderOptions: { map: map },
+        
             onSearchComplete: function(results){
                 if (transit.getStatus() === BMAP_STATUS_SUCCESS) {
-                    let i = 0;
-                    // 获取所有的方案
-                    let start = results.getStart();
-                    let end = results.getEnd();
-                    for(i = 0 ; i < results.getNumPlans(); i++)
-                    {
-                        const plan = results.getPlan(i);
-                        // 为每个方案添加一个按钮               
-                        const button = document.createElement('button');
-                        button.innerHTML = `方案 ${i + 1}`;
-                        button.onclick = () => showPlanOnMap(plan, map , start, end);
-                        document.body.appendChild(button);
-            
+                    let plans = [];
+                    let starts = [];
+                    let ends = [];
+                    for(let i = 0; i < results.getNumPlans(); i++) {
+                        plans.push(results.getPlan(i));
+                        starts.push(results.getStart());
+                        ends.push(results.getEnd());
                     }
-
+                    callback && callback(plans, map ,starts ,ends);  // 将方案返回给回调函数
                 }
             },
         });
-        transit.setPageCapacity(5);  // 设置每页返回方案个数为2
-
+        transit.setPageCapacity(5);  // 设置每页返回方案个数为5
+    
         transit.search(sPoint, ePoint);
     } catch (error) {
         alert(error.message);
@@ -119,6 +132,7 @@ async function TransNavigation(startPoint, endPoint, city, mapId) {
 
 export {
     TransNavigation,
-    showmap,
+    showPlanOnMap,
+    showTrain,
   };
   
