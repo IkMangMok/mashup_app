@@ -7,6 +7,7 @@
               <TrainSearch v-if="message.type === 'train'" :date="message.date" :start="message.start" :end="message.end" />
               <WikiPedia v-if="message.type === 'scenary'" :query="message.location" />
               <WeatherSearch v-if="message.type === 'weather'" :cityname="message.city" />
+              <MetroMap v-if="message.type === 'metromap'" :cityname="message.city" />
           </div>
         </div>
         <div class="input-section">
@@ -28,7 +29,7 @@
   import WikiPedia from './WikiPedia.vue';
   import WeatherSearch from './WeatherSearch.vue';
   import getWeather from '@/services/weather.js';
-
+  
   export default {
     name: 'ChatGpt',
     data() {
@@ -51,6 +52,7 @@
         TrainSearch,
         WikiPedia,
         WeatherSearch,
+
     },
     mounted(){
 
@@ -101,6 +103,10 @@
             extractionMessage: '请提取出城市，输出格式例如：“城市：CC。”'
           },
           {
+            keywords: ['GPT'],
+            apiType: 6,
+          },
+          {
             keywords: ['无'],
             apiType: 0,
           },
@@ -117,8 +123,9 @@
               for (let keyword of config.keywords) {
                   if (this.userInput.includes(keyword)) {
                       this.ApiType = config.apiType;
-                      await this.getsparkResponse(`这是输入文本：“${this.userInput}”${config.extractionMessage}`);
-                      this.userInput = [];
+                      if(this.ApiType != 6){
+                          await this.getsparkResponse(`这是输入文本：“${this.userInput}”${config.extractionMessage}`);
+                      }
                       matchedConfig = config;
                       break;
                   }
@@ -155,9 +162,11 @@
           if (missingValues.length > 0) {
             console.log("以下值缺失:", missingValues.join(", "));
             this.chatHistory.push({ role: 'gpt', content: `以下值缺失: ${missingValues.join(", ")}`, type: 'text' });
-            this.gptInput = this.sparkHistory;
+            this.gptInput = this.userInput;
+            console.log(this.userInput)
             this.getGPTResponse();
             this.gptInput = '';
+            this.userInput = '';
             return false;
           }
           else{
@@ -191,13 +200,13 @@
                   this.todaysWeatherData = await getWeather(city);
                   console.log(this.todaysWeatherData);
                   
-                  if (!city) {
+                  if (!city || city == 'CC') {
                       missingValues.push("城市");
                   }
-                  if (!startPoint) {
+                  if (!startPoint || startPoint == 'AAA') {
                       missingValues.push("起点");
                   }
-                  if (!endPoint) {
+                  if (!endPoint || endPoint == 'BBB') {
                       missingValues.push("终点");
                   }
 
@@ -221,12 +230,13 @@
                   else{
                     date = this.formatDate(matchDate[1])? this.formatDate(matchDate[1]) : defaultDate;  
                   }
-                  if (!startPoint) {
+                  if (!startPoint || startPoint == 'AAA') {
                       missingValues.push("起点");
                   }
-                  if (!endPoint) {
+                  if (!endPoint || endPoint == 'BBB') {
                       missingValues.push("终点");
                   }
+
                   this.handleMissingValues(missingValues);  // 使用函数处理重复逻辑
                   this.sparkHistory = [];
                   break;
@@ -246,13 +256,13 @@
                   startPoint = matchStart ? matchStart[1] : null;
                   endPoint = matchEnd ? matchEnd[1] : null;
 
-
-                  if (!startPoint) {
+                  if (!startPoint || startPoint == 'AAA') {
                       missingValues.push("起点");
                   }
-                  if (!endPoint) {
+                  if (!endPoint || endPoint == 'BBB') {
                       missingValues.push("终点");
                   }
+
                   if(this.handleMissingValue(missingValues))
                   {
                       this.chatHistory.push({ role: 'gpt', content: '', type: 'train', date: date, start: startPoint , end: endPoint })
@@ -263,7 +273,7 @@
               case 4:  // 景点
                 location = matchLocation ? matchLocation[1] : null;
                 console.log(location,matchLocation);
-                if (!location) {
+                if (!location || location == 'BBB') {
                     missingValues.push("景点");
                 }
                 if(this.handleMissingValue(missingValues))
@@ -277,15 +287,20 @@
               case 5:     //天气
                 city = matchWeatherCity ? matchWeatherCity[1] : null;
 
-                if (!city) {
-                    missingValues.push("城市");
-                }
+                if (!city || city == 'CC') {
+                      missingValues.push("城市");
+                  }
                 if(this.handleMissingValue(missingValues)){
                     this.chatHistory.push({ role: 'gpt', content: '', type: 'weather', city: city})
                 }
                 
                 this.sparkHistory =[];
                 break;
+                case 6:   //GPT
+                    this.gptInput = this.userInput;
+                    this.getGPTResponse();
+                    break;
+            
               default:
                 break;
               // ... 更多的case
@@ -317,7 +332,7 @@
               apiKey: this.API_KEY,
               dangerouslyAllowBrowser: true 
           });
-
+          console.log(this.gptInput)
           try {
                   const completion = await this.openai.chat.completions.create({
                       model: "gpt-3.5-turbo",
