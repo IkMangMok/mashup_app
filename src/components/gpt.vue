@@ -278,7 +278,7 @@
                 }
                 if(this.handleMissingValue(missingValues))
                 {
-                    alert('速速科学上网!');
+                  
                     this.chatHistory.push({ role: 'gpt', content: '', type: 'scenary', location: location})
                 }
                 

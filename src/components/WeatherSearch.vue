@@ -1,6 +1,6 @@
 <template>
     <div class="weather-container">
-      <h2>{{ cityname }}的天气 😃</h2>
+      <h2>{{ cityname }}的实时天气 😃</h2>
       <div class="weather-card" v-if="weatherData">
         <p><strong>天气情况:</strong> {{ weatherData.weather }} ☁️</p>
         <p><strong>温度:</strong> {{ weatherData.temperature }}°C 🌡️</p>
