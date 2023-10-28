@@ -74,9 +74,9 @@
         sleep(ms) {
           return new Promise(resolve => setTimeout(resolve, ms));
         },
-        async APIChoose(){
+        async APIChoose(){ 
         
-          const apiConfigurations = [
+          const apiConfigurations = [   // 配置API的关键词和相应信息
           {
             keywords: ['导航','地图'],
             apiType: 1,
@@ -111,6 +111,7 @@
             apiType: 0,
           },
         ];
+            // 创建一个关键词列表，其中包含配置索引和关键词
         let keywordsList = apiConfigurations.map((config, index) => {
             return {
                 index: index,
@@ -120,20 +121,25 @@
         console.log(JSON.stringify(keywordsList))
           let matchedConfig = null;
           for (let config of apiConfigurations) {
-              for (let keyword of config.keywords) {
-                  if (this.userInput.includes(keyword)) {
-                      this.ApiType = config.apiType;
-                      if(this.ApiType != 6){
-                          await this.getsparkResponse(`这是输入文本：“${this.userInput}”${config.extractionMessage}`);
-                      }
-                      matchedConfig = config;
-                      break;
-                  }
+            // 循环遍历每个配置的关键词
+            for (let keyword of config.keywords) {
+              if (this.userInput.includes(keyword)) {
+                // 设置API类型
+                this.ApiType = config.apiType;
+                if(this.ApiType != 6){
+                  await this.getsparkResponse(`这是输入文本：“${this.userInput}”${config.extractionMessage}`);
+                }
+                // 设置匹配的配置为当前配置
+                matchedConfig = config;
+                break;
               }
-              if (matchedConfig) break;
+            }
+            // 如果找到了匹配的配置，跳出循环
+            if (matchedConfig) break;
           }
-          if(!matchedConfig)
-          {
+          
+          // 如果没有找到匹配的配置
+          if(!matchedConfig) {
             this.ApiType = 0;
             await this.getsparkResponse(this.userInput);
             this.chatHistory.push({ role: 'gpt', content: this.sparkHistory, type: 'text'});

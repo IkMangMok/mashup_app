@@ -33,7 +33,7 @@ function fetchTrainData(date,start,end) {
         };
                               
         const vor_url = `/otn/leftTicketPrice/query?leftTicketDTO.train_date=${data.train_date}&leftTicketDTO.from_station=${data.from_station}&leftTicketDTO.to_station=${data.to_station}&purpose_codes=ADULT`;
-        axios.get(vor_url);
+        axios.get(vor_url);  //避免CORS
 
         
         axios.get('/otn/leftTicket/query', {

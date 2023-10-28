@@ -123,13 +123,27 @@ export default {
 </script>
 
 <style scoped>
-/* 表格的基础样式 */
+
+.content-row {
+    height: 800px;  /* 或您想要的其他值 */
+    display: flex;
+    flex-direction: column;
+}
+
+.table-container {
+    max-height: 400px;  /* content-row高度减去map-wrapper高度 */
+    overflow-y: auto;
+    flex-grow: 1;  /* 允许table-container在必要时扩展其高度 */
+}
+
 table {
     width: 100%;
     border-collapse: collapse;    /* 合并相邻的边框 */
     font-size: 14px;
     text-align: left;             /* 文本居左对齐 */
     margin-bottom: 20px;          /* 表格下方添加20像素的间隔 */
+    max-height: 400px;
+    overflow-y: auto;
 }
 
 /* 表头样式 */
@@ -173,8 +187,7 @@ tbody tr:hover {
     height: 400px;
     margin-top: 20px;
 }
-.content-row {
-    align-items: stretch;   /* 使子元素垂直对齐并填充整个容器的高度*/
+.map-wrapper {
+    height: 400px;  /* 或您想要的其他值 */
 }
-
 </style>

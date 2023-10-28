@@ -104,6 +104,7 @@
   padding: 10px;
   border-right: 1px solid #ccc;
   min-width: 500px;
+  overflow-y: auto; /* 如果内容超出容器高度，会出现滚动条 */
 }
 
 

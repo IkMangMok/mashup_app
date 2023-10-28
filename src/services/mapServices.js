@@ -1,8 +1,8 @@
 /* global BMapGL */
 /* eslint-disable */
-import {emitter} from './emitter.js';
+import {AddressEmitter} from './emitter.js';
 
-function showTrain(start, end, mapId){
+async function showTrain(start, end, mapId){
     let map;
     try {
         map = new BMapGL.Map(mapId);
@@ -11,16 +11,18 @@ function showTrain(start, end, mapId){
         console.error("Error with BMapGL:", error.message);
         return;
     }
-
-    var startlocal = new BMapGL.LocalSearch(map, {
-		renderOptions:{map: map},
-        onSearchComplete: function(results){
-            console.log(results);
-        }
-	});
-    //startlocal.search(start);
-    console.log(start);
-
+    const StartGeo = new BMapGL.Geocoder();
+    const EndGeo = new BMapGL.Geocoder();
+    console.log(start,end)
+    const sPoint = await getPoint(StartGeo, start ,start);
+    const ePoint = await getPoint(EndGeo, end ,end);
+    console.log(sPoint,ePoint)
+    const polyline = new BMapGL.Polyline([
+        sPoint,
+        ePoint
+    ]);
+    console.log(polyline)
+    map.addOverlay(polyline);
 
 
 }
@@ -70,12 +72,7 @@ function showPlanOnMap(plan, map ,start ,end) {
     map.addOverlay(startMarker);
     map.addOverlay(endMarker);
 
-    let routeString = plan.getDescription(false);
-    const routeDuration = plan.getDuration(true);
-    const routeDistance = plan.getDistance(true);
-    console.log(routeString,routeDuration,routeDistance);
-    routeString = routeString + '。总时长：' + routeDuration +",总距离：" + routeDistance;
-    emitter.emit('route-found', routeString);
+
 }
 
 
@@ -87,14 +84,14 @@ async function TransNavigation(startPoint, endPoint, city, mapId, callback) {
 
     let map;
     try {
-        map = new BMapGL.Map(mapId);
+        map = new BMapGL.Map(mapId);  //创建地图实例
         map.centerAndZoom(city, 12);
     } catch (error) {
         console.error("Error with BMapGL:", error.message);
         return;
     }
 
-    const StartGeo = new BMapGL.Geocoder();
+    const StartGeo = new BMapGL.Geocoder(); //创建地址编码
     const EndGeo = new BMapGL.Geocoder();
 
     try {
@@ -103,7 +100,7 @@ async function TransNavigation(startPoint, endPoint, city, mapId, callback) {
 
         console.log(sPoint, ePoint);
 
-        const transit = new BMapGL.TransitRoute(map, {
+        const transit = new BMapGL.TransitRoute(map, {//搜索完成后进行赋值
         
             onSearchComplete: function(results){
                 if (transit.getStatus() === BMAP_STATUS_SUCCESS) {
@@ -115,6 +112,10 @@ async function TransNavigation(startPoint, endPoint, city, mapId, callback) {
                         starts.push(results.getStart());
                         ends.push(results.getEnd());
                     }
+                    if(plans.length > 0)
+                    {
+                        showPlanOnMap(plans[0],map,starts[0],ends[0]);
+                    }
                     callback && callback(plans, map ,starts ,ends);  // 将方案返回给回调函数
                 }
             },
@@ -122,17 +123,34 @@ async function TransNavigation(startPoint, endPoint, city, mapId, callback) {
         transit.setPageCapacity(5);  // 设置每页返回方案个数为5
     
         transit.search(sPoint, ePoint);
+
+        map.addEventListener('click', function (e) {
+
+            getAdressFromPoint(e.latlng, (adr)=>{
+                console.log(adr)
+                AddressEmitter.emit('address-found', adr);
+            })
+        });
+
     } catch (error) {
         alert(error.message);
     }
 }
 
 
-
+function getAdressFromPoint(point, callback) {
+    
+    var geoc = new BMapGL.Geocoder();
+    geoc.getLocation(point, function(rs) {
+        var address = rs.address;
+        callback(address);  // 使用回调函数返回地址
+    });
+}
 
 export {
     TransNavigation,
     showPlanOnMap,
     showTrain,
+    getAdressFromPoint,
   };
   
