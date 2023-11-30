@@ -33,7 +33,7 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  background-image: url(~@/assets/bg.png);  /* 添加这行代码 */
+  background-image: url(~@/assets/bg.png); 
   background-size: cover;  /* 背景图片会覆盖整个元素 */
   background-position: center;  /* 背景图片居中 */
   background-repeat: no-repeat;  /* 不重复背景图片 */
@@ -55,7 +55,7 @@ export default {
   max-width: 800px;
   max-height: 800px;
   overflow: auto;
-  margin: 0 auto;  /* 添加这行来使gpt在其容器中居中 */
+  margin: 0 auto;  /* 使gpt在其容器中居中 */
 }
 
 

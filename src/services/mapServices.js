@@ -65,7 +65,6 @@ function showPlanOnMap(plan, map ,start ,end) {
     }
 
 
-    // 你还可以添加起点和终点的标记
     console.log(start,end);
     const startMarker = new BMapGL.Marker(start.point);
     const endMarker = new BMapGL.Marker(end.point);

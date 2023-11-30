@@ -125,7 +125,7 @@ export default {
 <style scoped>
 
 .content-row {
-    height: 800px;  /* 或您想要的其他值 */
+    height: 800px; 
     display: flex;
     flex-direction: column;
 }
@@ -188,6 +188,6 @@ tbody tr:hover {
     margin-top: 20px;
 }
 .map-wrapper {
-    height: 400px;  /* 或您想要的其他值 */
+    height: 400px;  
 }
 </style>

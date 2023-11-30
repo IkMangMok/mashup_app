@@ -14,7 +14,7 @@ const apiConfig ={
     },
     payload: {
         message: {
-            text: []  // 你可以在调用时动态填充这部分内容
+            text: []  // 在调用时动态填充这部分内容
         }
     }
 }
